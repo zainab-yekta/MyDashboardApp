@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using MyDashboardApp.Models;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace MyDashboardApp.Controllers
 {
@@ -11,6 +13,18 @@ namespace MyDashboardApp.Controllers
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
+        }
+
+        [Authorize(Roles = "Admin")] // Only admins can access this
+        public IActionResult AdminDashboard()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "User")] // Only users can access this
+        public IActionResult UserDashboard()
+        {
+            return View();
         }
 
         public IActionResult Index()

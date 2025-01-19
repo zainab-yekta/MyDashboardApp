@@ -11,10 +11,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.AspNetCore.Identity.UI.UIFrameworkAttribute("Bootstrap5")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("MyDashboardApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+81fbbbeb723d85167605cd905b1c246ccefaee9f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f9e25dd23ff032d970dbe534b37f2fb9a2639e0d")]
 [assembly: System.Reflection.AssemblyProductAttribute("MyDashboardApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MyDashboardApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
