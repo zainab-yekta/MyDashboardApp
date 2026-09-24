@@ -2,6 +2,8 @@
 
 A small sales dashboard built with ASP.NET Core 8. Admins add monthly sales, and every open dashboard updates instantly through SignalR, with no page refresh.
 
+> **Note:** I first built this project in January 2025 as a technical interview task for a company, then cleaned it up and finished it for my portfolio.
+
 ![Admin adds a sale on the left, the user's dashboard updates on the right](mockup/preview.gif)
 
 ## What it does
