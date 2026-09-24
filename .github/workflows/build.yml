@@ -1,8 +1,8 @@
-name: Build
+name: Build and deploy
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
 
 jobs:
@@ -15,3 +15,20 @@ jobs:
           dotnet-version: 8.0.x
       - run: dotnet restore
       - run: dotnet build --no-restore --configuration Release
+
+  # Runs only after the Azure web app name is saved as a repository variable
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && vars.AZURE_WEBAPP_NAME != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet publish --configuration Release --output ./publish
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish

@@ -59,6 +59,13 @@ namespace MyDashboardApp.Data
             }
         }
 
+        // Remove everything added by visitors and put the sample year back
+        public static async Task ResetSalesAsync(MyDashboardAppContext context)
+        {
+            await context.SalesData.ExecuteDeleteAsync();
+            await SeedSales(context);
+        }
+
         private static async Task SeedSales(MyDashboardAppContext context)
         {
             if (await context.SalesData.AnyAsync())

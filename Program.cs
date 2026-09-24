@@ -6,6 +6,9 @@ using MyDashboardApp.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Private settings such as the admin account, ignored by git
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false);
+
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrEmpty(connectionString))
@@ -32,6 +35,12 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 
 // Add SignalR service
 builder.Services.AddSignalR();
+
+// Daily reset of the sample data, turned on for the public demo only
+if (builder.Configuration.GetValue<bool>("DemoData:ResetDaily"))
+{
+    builder.Services.AddHostedService<DemoResetService>();
+}
 
 // Check the antiforgery token on every POST
 builder.Services.AddControllersWithViews(options =>

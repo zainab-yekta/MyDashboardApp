@@ -49,22 +49,32 @@ The default connection string points to LocalDB. To use a full SQL Server instan
 Server=localhost;Database=MyDashboardApp;Trusted_Connection=True;TrustServerCertificate=True
 ```
 
-### Demo accounts
+### Accounts
 
-These are created in the Development environment from `appsettings.Development.json`.
+A read-only account is created on startup, so anyone can look around:
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Admin | admin@demo.com | Admin@123 |
-| User | user@demo.com | User@123 |
+| Email | Password |
+| --- | --- |
+| user@demo.com | User@123 |
 
-To see the live update, sign in as admin in one browser and as user in a private window, then add a sale.
+The admin account is not public. To try the admin view locally, create an `appsettings.Local.json` file next to `appsettings.json` (it is ignored by git) and restart the app:
+
+```json
+{
+  "DemoAccounts": {
+    "AdminEmail": "admin@demo.com",
+    "AdminPassword": "Choose-a-strong-password1"
+  }
+}
+```
+
+Then sign in as admin in one browser and as the read-only user in a private window, and add a sale to see the live update.
 
 ## Project layout
 
 ```
 Controllers/HomeController.cs   dashboard page and the AddSale endpoint
-Data/                           DbContext and startup seeding
+Data/                           DbContext, startup seeding and the daily demo reset
 Hubs/ChartHub.cs                SignalR hub the dashboards listen to
 Models/                         SalesData entity and the dashboard view model
 Views/Home/Index.cshtml         the dashboard
@@ -72,6 +82,16 @@ wwwroot/js/dashboard.js         chart, SignalR client and the add sale form
 Areas/Identity/                 customized login page
 mockup/                         screenshots and the preview GIF
 ```
+
+## Deployment
+
+The GitHub Actions workflow builds every push. It can also publish to Azure App Service with an Azure SQL database:
+
+1. Create the web app (.NET 8) and the database in Azure.
+2. In the web app's configuration, add the connection string `DefaultConnection` and these app settings: `DemoAccounts__AdminEmail`, `DemoAccounts__AdminPassword` and `DemoData__ResetDaily` set to `true`.
+3. In the GitHub repository settings, add the variable `AZURE_WEBAPP_NAME` and the secret `AZURE_WEBAPP_PUBLISH_PROFILE` (downloaded from the web app's overview page).
+
+After that, each push to `main` is deployed. The migration runs on startup, and with `ResetDaily` on, the sample data is restored when the app starts and every 24 hours after that.
 
 ## Notes
 
