@@ -1,8 +1,97 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Sales Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Sales Dashboard</h1>
+    <span id="live-status" class="badge text-bg-secondary">Connecting...</span>
 </div>
+
+<!-- KPI cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body">
+                <h6 class="card-title">Total Sales</h6>
+                <h3 id="kpi-total" class="mb-0">@Model.Total.ToString("N0")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <h6 class="card-title">Best Month</h6>
+                <h3 id="kpi-best" class="mb-0">@Model.BestMonth</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-dark h-100">
+            <div class="card-body">
+                <h6 class="card-title">Monthly Average</h6>
+                <h3 id="kpi-average" class="mb-0">@Model.Average.ToString("N0")</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Chart -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Monthly Sales</h5>
+                <canvas id="salesChart" height="140"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        @if (User.IsInRole("Admin"))
+        {
+            <!-- Only admins can add data -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Add Sale</h5>
+                    <form id="sale-form" asp-action="AddSale" method="post">
+                        <div class="mb-2">
+                            <input name="Month" class="form-control" placeholder="Month, e.g. Jan 26" maxlength="20" required />
+                        </div>
+                        <div class="mb-2">
+                            <input name="Sales" type="number" class="form-control" placeholder="Sales" min="0" max="1000000" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Add</button>
+                        <div id="sale-error" class="text-danger small mt-2"></div>
+                    </form>
+                </div>
+            </div>
+        }
+
+        <!-- Recent sales -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Recent Sales</h5>
+                <ul id="recent-sales" class="list-group list-group-flush">
+                    @foreach (var sale in Model.RecentSales)
+                    {
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span>@sale.Month</span><strong>@sale.Sales.ToString("N0")</strong>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/chart.js/chart.umd.min.js"></script>
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    <script>
+        // Json.Serialize escapes HTML characters, so the data is safe inside a script tag
+        const salesLabels = @Json.Serialize(Model.Labels);
+        const salesValues = @Json.Serialize(Model.Values);
+    </script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}

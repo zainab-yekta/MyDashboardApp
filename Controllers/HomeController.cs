@@ -1,40 +1,57 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using MyDashboardApp.Models;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using MyDashboardApp.Data;
+using MyDashboardApp.Hubs;
+using MyDashboardApp.Models;
 
 namespace MyDashboardApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly MyDashboardAppContext _context;
+        private readonly IHubContext<ChartHub> _chartHub;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(MyDashboardAppContext context, IHubContext<ChartHub> chartHub)
         {
-            _logger = logger;
+            _context = context;
+            _chartHub = chartHub;
         }
 
-        [Authorize(Roles = "Admin")] // Only admins can access this
-        public IActionResult AdminDashboard()
+        [Authorize]
+        public async Task<IActionResult> Index()
         {
-            return View();
+            // Fetch sales data from the database in the order it was added
+            var sales = await _context.SalesData.OrderBy(s => s.Id).ToListAsync();
+
+            var model = new DashboardViewModel
+            {
+                Labels = sales.Select(s => s.Month).ToArray(),
+                Values = sales.Select(s => s.Sales).ToArray(),
+                RecentSales = sales.TakeLast(5).Reverse().ToList()
+            };
+
+            return View(model);
         }
 
-        [Authorize(Roles = "User")] // Only users can access this
-        public IActionResult UserDashboard()
+        [HttpPost]
+        [Authorize(Roles = "Admin")] // Only admins can add data
+        public async Task<IActionResult> AddSale([Bind("Month,Sales")] SalesData sale)
         {
-            return View();
-        }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+            _context.SalesData.Add(sale);
+            await _context.SaveChangesAsync();
 
-        public IActionResult Privacy()
-        {
-            return View();
+            // Push the new point to every open dashboard
+            await _chartHub.Clients.All.SendAsync("SaleAdded", sale.Month, sale.Sales);
+
+            return Ok();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
