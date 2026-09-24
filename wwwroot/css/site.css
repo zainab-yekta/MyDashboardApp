@@ -23,3 +23,14 @@ body {
 body {
   background-color: #f5f7fa;
 }
+
+.chart-box {
+  position: relative;
+  height: 260px;
+}
+
+@media (min-width: 992px) {
+  .chart-box {
+    height: 400px;
+  }
+}

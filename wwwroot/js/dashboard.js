@@ -13,6 +13,7 @@ const chart = new Chart(document.getElementById('salesChart'), {
         }]
     },
     options: {
+        maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: { y: { beginAtZero: true } }
     }
@@ -59,11 +60,11 @@ connection.on('SaleAdded', (month, sales) => {
 });
 
 const status = document.getElementById('live-status');
-connection.onreconnecting(() => { status.textContent = 'Reconnecting...'; status.className = 'badge text-bg-warning'; });
-connection.onreconnected(() => { status.textContent = 'Live'; status.className = 'badge text-bg-success'; });
+connection.onreconnecting(() => { status.textContent = 'Reconnecting...'; status.className = 'badge bg-warning text-dark'; });
+connection.onreconnected(() => { status.textContent = 'Live'; status.className = 'badge bg-success'; });
 
 connection.start()
-    .then(() => { status.textContent = 'Live'; status.className = 'badge text-bg-success'; })
+    .then(() => { status.textContent = 'Live'; status.className = 'badge bg-success'; })
     .catch(err => console.error(err));
 
 // Admin form: post with the antiforgery token, the hub sends the update back
