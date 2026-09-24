@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MyDashboardApp.Areas.Identity.Data;
+using MyDashboardApp.Data;
+using MyDashboardApp.Models;
 using MyDashboardApp.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;

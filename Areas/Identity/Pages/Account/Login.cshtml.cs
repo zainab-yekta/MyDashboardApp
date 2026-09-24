@@ -70,7 +70,7 @@ namespace MyDashboardApp.Areas.Identity.Pages.Account
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
+            ///     directly from code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
             [DataType(DataType.Password)]
@@ -78,7 +78,7 @@ namespace MyDashboardApp.Areas.Identity.Pages.Account
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
+            ///     directly from code. This API may change or be removed in future releases.
             /// </summary>
             [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
@@ -109,9 +109,8 @@ namespace MyDashboardApp.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                // Failed attempts count towards account lockout
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");

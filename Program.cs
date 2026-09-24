@@ -1,12 +1,10 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using MyDashboardApp.Areas.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MyDashboardApp.Data;
 using MyDashboardApp.Hubs;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using MyDashboardApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -18,129 +16,49 @@ if (string.IsNullOrEmpty(connectionString))
 builder.Services.AddDbContext<MyDashboardAppContext>(options =>
     options.UseSqlServer(connectionString));
 
-//Configure a Real Email Sender
-//builder.Services.AddTransient<IEmailSender>(provider =>
-//    new SendGridEmailSender("Your_SendGrid_API_Key"));
-
-// Add Identity Services
+// Add Identity with roles
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
-{ 
+{
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
-    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedAccount = false; // No email service in this demo
 })
-.AddEntityFrameworkStores<MyDashboardAppContext>()    
-.AddDefaultTokenProviders();
+.AddEntityFrameworkStores<MyDashboardAppContext>()
+.AddDefaultTokenProviders()
+.AddDefaultUI();
 
 // Add SignalR service
 builder.Services.AddSignalR();
 
-//register the DummyEmailSender
-builder.Services.AddTransient<IEmailSender, DummyEmailSender>();
+// Check the antiforgery token on every POST
+builder.Services.AddControllersWithViews(options =>
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 
-// Add Razor Pages
+// Add Razor Pages for the Identity UI
 builder.Services.AddRazorPages();
-
-// Add Controllers with Views
-builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Seed roles into the database
-async Task SeedRoles(IServiceProvider serviceProvider)
+// Apply migrations and seed roles, demo users and sample sales
+using (var scope = app.Services.CreateScope())
 {
-    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-    string[] roles = { "Admin", "User" };
-
-    foreach (var role in roles)
+    try
     {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new IdentityRole
-            {
-                Name = role,
-                NormalizedName = role.ToUpper()
-            });
-        }
+        await SeedData.InitializeAsync(scope.ServiceProvider);
     }
-}
-
-// Seed users and assign them roles
-async Task SeedUsersWithRoles(IServiceProvider serviceProvider)
-{
-    var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
-
-    // Access credentials from appsettings.json
-    var adminEmail = builder.Configuration["AdminEmail"] ?? "admin@example.com";
-    var adminPassword = builder.Configuration["AdminPassword"] ?? "Admin@123";
-
-    // Create an admin user
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-    if (adminUser == null)
+    catch (Exception ex)
     {
-        adminUser = new IdentityUser
-        {
-            UserName = "admin",
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
-
-        await userManager.CreateAsync(adminUser, "Admin@123"); // Strong password
+        app.Logger.LogError(ex, "An error occurred while seeding the database.");
     }
-
-    // Assign Admin role
-    if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
-    {
-        await userManager.AddToRoleAsync(adminUser, "Admin");
-    }
-
-    // Create a regular user
-    var userEmail = builder.Configuration["UserEmail"] ?? "user@example.com";
-    var userPassword = builder.Configuration["UserPassword"] ?? "User@123";
-
-    var regularUser = await userManager.FindByEmailAsync(userEmail);
-
-    if (regularUser == null)
-    {
-        regularUser = new IdentityUser
-        {
-            UserName = "user",
-            Email = userEmail,
-            EmailConfirmed = true
-        };
-
-        await userManager.CreateAsync(regularUser, "User@123"); // Strong password
-    }
-
-    // Assign User role
-    if (!await userManager.IsInRoleAsync(regularUser, "User"))
-    {
-        await userManager.AddToRoleAsync(regularUser, "User");
-    }
-}
-
-// Seed roles and users
-var serviceProvider = app.Services.CreateScope().ServiceProvider;
-try
-{
-    await SeedRoles(serviceProvider);
-    await SeedUsersWithRoles(serviceProvider);
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"An error occurred while seeding roles and users: {ex.Message}");
 }
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-
     app.UseHsts();
 }
 
@@ -152,7 +70,6 @@ app.UseAuthorization();
 
 app.MapHub<ChartHub>("/chartHub"); // Map SignalR hub
 app.MapRazorPages(); // For Identity pages
-app.MapControllers();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
