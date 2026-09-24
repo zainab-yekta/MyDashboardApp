@@ -15,11 +15,14 @@ A small sales dashboard built with ASP.NET Core 8. Admins add monthly sales, and
 
 ## Tech stack
 
+- C# and JavaScript
 - ASP.NET Core 8 MVC, with Razor Pages for the Identity UI
-- Entity Framework Core 8 with SQL Server
+- Entity Framework Core 8 with SQL Server, using code first migrations and seeding on startup
 - ASP.NET Core Identity with role based authorization
 - SignalR for real time updates
+- A hosted background service for the daily demo data reset
 - Chart.js and Bootstrap 5 on the front end
+- GitHub Actions for continuous integration
 
 ## Screenshots
 
