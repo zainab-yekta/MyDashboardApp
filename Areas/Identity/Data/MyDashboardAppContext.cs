@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace MyDashboardApp.Areas.Identity.Data;
 
@@ -34,10 +33,12 @@ public class MyDashboardAppContext : IdentityDbContext<IdentityUser>
         });
     }
 }
-// Example SalesData entity
+// Example SalesData entity(CURD operation)
 public class SalesData
 {
     public int Id { get; set; } // Primary key
     public string? Month { get; set; }
     public int Sales { get; set; }
 }
+
+

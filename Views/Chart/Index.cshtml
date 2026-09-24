@@ -19,10 +19,10 @@
         const chart = new Chart(ctx, {
             type: 'bar', // Type of chart: bar, line, pie, etc.
             data: {
-                labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.Labels)),
+                labels: @Json.Serialize(ViewBag.Labels),
                 datasets: [{
                     label: 'Sales Data',
-                    data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ChartData)),
+                    data: @Json.Serialize(ViewBag.ChartData),
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',

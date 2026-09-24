@@ -1,14 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using MyDashboardApp.Areas.Identity.Data;
-using Microsoft.AspNetCore.SignalR;
 using MyDashboardApp.Hubs;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using MyDashboardApp.Services;
-using Microsoft.Extensions.Options;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 
 var builder = WebApplication.CreateBuilder(args);
 
