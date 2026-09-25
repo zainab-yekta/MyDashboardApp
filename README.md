@@ -39,7 +39,7 @@ A small sales dashboard built with ASP.NET Core 8. Admins add monthly sales, and
 You need the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) and SQL Server. LocalDB, which comes with Visual Studio, is enough.
 
 ```bash
-git clone https://github.com/zainab-yekta/MyDashboardApp.git
+git clone https://github.com/zeinab-r-yekta/MyDashboardApp.git
 cd MyDashboardApp
 dotnet run
 ```
